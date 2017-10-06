@@ -1,0 +1,63 @@
+<ui:composition template="/WEB-INF/template/LayoutPadrao.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Pesquisa Clientes</ui:define>
+
+	<ui:define name="corpo">
+		<h:form id="pesquisaClienteFrm">
+			<h1>Pesquisa Clientes</h1>
+
+			<p:toolbar style="margin-top: 20px;height: 28px;">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" id="pesquisar" action="#{pesquisaClientesBean.pesquisar}" update="@form" />
+				</p:toolbarGroup>
+				<p:toolbarGroup align="right">
+					<p:button value="Novo" outcome="/clientes/CadastroCliente" />
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<p:panelGrid columns="2" id="painel" style="width: 100%;margin-top:20px;" columnClasses="rotulo, campo">
+				<p:outputLabel value="CPF/CNPJ" for="cpfCnpj" />
+				<p:inputText id="cpfCnpj" value="#{pesquisaClientesBean.clienteFilter.cpfCnpj}" />
+
+				<p:outputLabel value="Nome" for="nome" />
+				<p:inputText id="nome" size="100" value="#{pesquisaClientesBean.clienteFilter.nome}" />
+			</p:panelGrid>
+
+			<p:dataTable id="clientesTable" value="#{pesquisaClientesBean.clientesFiltrados}" var="cliente"
+				style="margin-top: 20px;" emptyMessage="Nenhum cliente encontrado" rows="20" paginator="true"
+				paginatorAlwaysVisible="false" paginatorPosition="bottom">
+				<p:column headerText="Nome">
+					<h:outputText value="#{cliente.nome}" />
+				</p:column>
+				<p:column headerText="Tipo" style="text-align: center; width: 100px;">
+					<h:outputText value="#{cliente.tipo.descricao}" />
+				</p:column>
+				<p:column headerText="CPF/CNPJ" style="text-align: center; width: 150px;">
+					<h:outputText value="#{cliente.documentoReceitaFederal}" />
+				</p:column>
+				<p:column style="text-align: center;width: 70px;">
+					<p:button  outcome="/clientes/CadastroCliente" icon="ui-icon-pencil" title="Editar">
+						<f:param name="cliente" value="#{cliente.id}" />
+					</p:button>
+					<p:commandButton title="Excluir" icon="ui-icon-trash" oncomplete="confirmaExclusao.show();" process="@this"
+						update=":pesquisaClienteFrm:confirmacaoExclusaoDialog" disabled="#{not seguranca.excluirClientePermitido}">
+						<f:setPropertyActionListener target="#{pesquisaClientesBean.clienteSelecionado}" value="#{cliente}" />
+					</p:commandButton>
+				</p:column>
+			</p:dataTable>
+
+
+			<!-- Dialog para exclusao -->
+			<p:confirmDialog id="confirmacaoExclusaoDialog" header="Exclusão de cliente" global="true"
+				message="Tem certeza que deseja excluir o cliente?" widgetVar="confirmaExclusao">
+				<p:commandButton value="Não" onclick="confirmaExclusao.hide(); return false;" icon="ui-icon-close" />
+				<p:commandButton value="Sim" oncomplete="confirmaExclusao.hide();" process="@this" update="clientesTable"
+					icon="ui-icon-check" action="#{pesquisaClientesBean.excluir}" />
+			</p:confirmDialog>
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>
